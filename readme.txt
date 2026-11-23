@@ -3,13 +3,13 @@ Contributors: rf-teen, rf_pouralizadeh
 Donate link: https://github.com/rf-teen/webarat-external-http-blocker
 Tags: http-blocker, firewall, outgoing-traffic, privacy, security, telemetry, persian, iran, speed
 Requires at least: 6.4
-Tested up to: 6.7
+Tested up to: 7.1
 Requires PHP: 8.2
 Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-مسدودساز هوشمند و فوق‌سبک درخواست‌های خروجی HTTP وردپرس. Ultra-lightweight outgoing HTTP blocker and firewall for WordPress.
+An ultra-lightweight, zero-overhead WordPress plugin to intercept, monitor, and block outgoing HTTP/HTTPS requests at core network level.
 
 == Description ==
 

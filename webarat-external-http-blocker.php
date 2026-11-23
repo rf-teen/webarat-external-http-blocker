@@ -291,18 +291,14 @@ final class Plugin
             'settings'  => $options,
         ];
 
-        $json = wp_json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         $filename = 'webarat-http-blocker-' . gmdate('Y-m-d-His') . '.json';
 
-        header('Content-Type: application/json; charset=utf-8');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Content-Length: ' . strlen((string) $json));
         header('Cache-Control: no-cache, no-store, must-revalidate');
         header('Pragma: no-cache');
         header('Expires: 0');
 
-        echo $json;
-        exit;
+        wp_send_json($payload, 200, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -453,7 +449,7 @@ final class Plugin
                         <th scope="row"><?php echo esc_html(self::t('master_switch')); ?></th>
                         <td>
                             <label>
-                                <input type="checkbox" name="<?php echo self::OPTION_NAME; ?>[enabled]" value="1" <?php checked($opt['enabled'], 1); ?>>
+                                <input type="checkbox" name="<?php echo esc_attr(self::OPTION_NAME); ?>[enabled]" value="1" <?php checked($opt['enabled'], 1); ?>>
                                 <strong><?php echo esc_html(self::t('enable_blocking')); ?></strong>
                             </label>
                         </td>
@@ -461,7 +457,7 @@ final class Plugin
                     <tr>
                         <th scope="row"><?php echo esc_html(self::t('blocked_domains')); ?></th>
                         <td>
-                            <textarea id="wb-domains" name="<?php echo self::OPTION_NAME; ?>[domains_raw]" rows="7" class="large-text code" dir="ltr" style="border-radius: 6px;"><?php echo esc_textarea(implode("\n", $opt['domains'])); ?></textarea>
+                            <textarea id="wb-domains" name="<?php echo esc_attr(self::OPTION_NAME); ?>[domains_raw]" rows="7" class="large-text code" dir="ltr" style="border-radius: 6px;"><?php echo esc_textarea(implode("\n", $opt['domains'])); ?></textarea>
                             <p class="description"><?php echo esc_html(self::t('domains_desc')); ?></p>
                             
                             <div class="preset-chips">
@@ -477,7 +473,7 @@ final class Plugin
                     <tr>
                         <th scope="row"><?php echo esc_html(self::t('whitelist_domains')); ?></th>
                         <td>
-                            <textarea name="<?php echo self::OPTION_NAME; ?>[whitelist_domains_raw]" rows="4" class="large-text code" dir="ltr" style="border-radius: 6px;"><?php echo esc_textarea(implode("\n", $opt['whitelist_domains'] ?? [])); ?></textarea>
+                            <textarea name="<?php echo esc_attr(self::OPTION_NAME); ?>[whitelist_domains_raw]" rows="4" class="large-text code" dir="ltr" style="border-radius: 6px;"><?php echo esc_textarea(implode("\n", $opt['whitelist_domains'] ?? [])); ?></textarea>
                             <p class="description"><?php echo esc_html(self::t('whitelist_desc')); ?></p>
                         </td>
                     </tr>
@@ -485,7 +481,7 @@ final class Plugin
                         <th scope="row"><?php echo esc_html(self::t('subdomain_rules')); ?></th>
                         <td>
                             <label>
-                                <input type="checkbox" name="<?php echo self::OPTION_NAME; ?>[block_subdomains]" value="1" <?php checked($opt['block_subdomains'], 1); ?>>
+                                <input type="checkbox" name="<?php echo esc_attr(self::OPTION_NAME); ?>[block_subdomains]" value="1" <?php checked($opt['block_subdomains'], 1); ?>>
                                 <?php echo esc_html(self::t('block_subs')); ?>
                             </label>
                         </td>
@@ -494,7 +490,7 @@ final class Plugin
                         <th scope="row"><?php echo esc_html(self::t('logging_label')); ?></th>
                         <td>
                             <label>
-                                <input type="checkbox" name="<?php echo self::OPTION_NAME; ?>[enable_logging]" value="1" <?php checked($opt['enable_logging'], 1); ?>>
+                                <input type="checkbox" name="<?php echo esc_attr(self::OPTION_NAME); ?>[enable_logging]" value="1" <?php checked($opt['enable_logging'], 1); ?>>
                                 <?php echo esc_html(self::t('logging_desc')); ?>
                             </label>
                         </td>
