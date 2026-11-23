@@ -1,6 +1,7 @@
 # Webarat External HTTP Blocker 🛡️
 
 [![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/rf-teen/webarat-external-http-blocker/releases)
+[![CI](https://github.com/rf-teen/webarat-external-http-blocker/actions/workflows/ci.yml/badge.svg)](https://github.com/rf-teen/webarat-external-http-blocker/actions/workflows/ci.yml)
 [![WordPress](https://img.shields.io/badge/WordPress-6.4%2B-blue.svg)](https://wordpress.org)
 [![PHP](https://img.shields.io/badge/PHP-8.2%2B-777bb4.svg)](https://php.net)
 [![License: GPL-2.0-or-later](https://img.shields.io/badge/License-GPL--2.0--or--later-green.svg)](LICENSE)
