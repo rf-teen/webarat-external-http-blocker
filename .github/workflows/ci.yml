@@ -1,0 +1,33 @@
+name: CI & Code Quality
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-test:
+    name: PHP ${{ matrix.php-version }} Syntax & Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: ['8.2', '8.3', '8.4']
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: intl, json
+
+      - name: Lint PHP Files (Syntax Check)
+        run: |
+          find . -name "*.php" ! -path "./vendor/*" -exec php -l {} \;
+
+      - name: Run Plugin Test Suite
+        run: |
+          php tests/test-plugin.php
