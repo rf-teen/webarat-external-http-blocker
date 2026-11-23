@@ -7,7 +7,10 @@
  * Requires at least: 6.4
  * Requires PHP: 8.2
  * Author:      Webarat
+ * Author URI:  https://github.com/rf-teen
  * License:     GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain: webarat-external-http-blocker
  */
 
 declare(strict_types=1);
@@ -42,6 +45,7 @@ final class Plugin
         add_action('admin_menu', [$this, 'registerSettingsPage']);
         add_action('admin_init', [$this, 'registerSettings']);
         add_action('admin_notices', [$this, 'renderNotices']);
+        add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);
         add_filter('plugin_action_links_' . plugin_basename(__FILE__), [$this, 'addSettingsLink']);
         add_action('wp_ajax_webarat_clear_blocked_logs', [$this, 'handleClearLogs']);
         add_action('admin_post_webarat_export_settings', [$this, 'handleExportSettings']);
@@ -102,6 +106,37 @@ final class Plugin
 
         $text = $dict[$key][$isFa ? 'fa' : 'en'] ?? $key;
         return empty($args) ? $text : sprintf($text, ...$args);
+    }
+
+    /**
+     * ثبت استاندارد استایل‌ها و اسکریپت‌ها در پنل ادمین
+     */
+    public function enqueueAdminAssets(string $hookSuffix): void
+    {
+        if ($hookSuffix !== 'settings_page_' . self::PAGE_SLUG) {
+            return;
+        }
+
+        wp_enqueue_style(
+            'webarat-admin-css',
+            plugins_url('assets/css/admin.css', __FILE__),
+            [],
+            self::VERSION
+        );
+
+        wp_enqueue_script(
+            'webarat-admin-js',
+            plugins_url('assets/js/admin.js', __FILE__),
+            [],
+            self::VERSION,
+            true
+        );
+
+        wp_localize_script('webarat-admin-js', 'webaratBlocker', [
+            'ajaxUrl'      => admin_url('admin-ajax.php'),
+            'nonce'        => wp_create_nonce('webarat_clear_nonce'),
+            'confirmClear' => self::t('confirm_clear'),
+        ]);
     }
 
     /**
@@ -402,28 +437,7 @@ final class Plugin
     public function renderUI(): void
     {
         $opt = $this->getOptions();
-        $isRtl = is_rtl();
-        $align = $isRtl ? 'right' : 'left';
         ?>
-        <style>
-            .webarat-wrap { max-width: 1040px; }
-            .webarat-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); padding: 26px 30px; margin-top: 20px; border: 1px solid #e5e7eb; }
-            .webarat-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-            .webarat-icon { color: #2563eb; font-size: 32px !important; width: 32px !important; height: 32px !important; }
-            .webarat-badge { background: #dcfce7; color: #166534; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }
-            .form-table th { font-weight: 600; color: #374151; width: 220px; }
-            .log-table { width: 100%; border-collapse: collapse; margin-top: 15px; border-radius: 8px; overflow: hidden; border: 1px solid #f3f4f6; }
-            .log-table th { background: #f9fafb; text-align: <?php echo $align; ?>; padding: 12px 14px; font-size: 12px; color: #4b5563; border-bottom: 1px solid #e5e7eb; }
-            .log-table td { padding: 12px 14px; border-bottom: 1px solid #f3f4f6; font-size: 12px; }
-            .preset-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; align-items: center; }
-            .preset-btn { background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer; color: #1f2937; transition: all 0.15s; }
-            .preset-btn:hover { background: #e5e7eb; border-color: #9ca3af; }
-            .caller-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-            .caller-plugin { background: #e0f2fe; color: #0369a1; }
-            .caller-theme { background: #fef3c7; color: #b45309; }
-            .caller-core { background: #f3f4f6; color: #4b5563; }
-        </style>
-
         <div class="wrap webarat-wrap">
             <div class="webarat-header">
                 <span class="dashicons dashicons-shield-alt webarat-icon"></span>
@@ -452,11 +466,11 @@ final class Plugin
                             
                             <div class="preset-chips">
                                 <span style="font-size: 11px; font-weight: 600; color: #6b7280;"><?php echo esc_html(self::t('presets_title')); ?></span>
-                                <button type="button" class="preset-btn" onclick="webaratAddDomain('telemetry.elementor.com')">+ Elementor Telemetry</button>
-                                <button type="button" class="preset-btn" onclick="webaratAddDomain('stats.wp.com')">+ Jetpack/WP Stats</button>
-                                <button type="button" class="preset-btn" onclick="webaratAddDomain('tracking.woocommerce.com')">+ WooCommerce Tracker</button>
-                                <button type="button" class="preset-btn" onclick="webaratAddDomain('api.freemius.com')">+ Freemius SDK</button>
-                                <button type="button" class="preset-btn" onclick="webaratAddDomain('google-analytics.com'); webaratAddDomain('googletagmanager.com');">+ Google Analytics/GTM</button>
+                                <button type="button" class="preset-btn" data-domain="telemetry.elementor.com">+ Elementor Telemetry</button>
+                                <button type="button" class="preset-btn" data-domain="stats.wp.com">+ Jetpack/WP Stats</button>
+                                <button type="button" class="preset-btn" data-domain="tracking.woocommerce.com">+ WooCommerce Tracker</button>
+                                <button type="button" class="preset-btn" data-domain="api.freemius.com">+ Freemius SDK</button>
+                                <button type="button" class="preset-btn" data-domain="google-analytics.com,googletagmanager.com">+ Google Analytics/GTM</button>
                             </div>
                         </td>
                     </tr>
@@ -488,17 +502,6 @@ final class Plugin
                 </table>
                 <?php submit_button(self::t('save_btn'), 'primary large'); ?>
             </form>
-
-            <script>
-            function webaratAddDomain(domain) {
-                var textarea = document.getElementById('wb-domains');
-                var lines = textarea.value.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
-                if (lines.indexOf(domain) === -1) {
-                    lines.push(domain);
-                    textarea.value = lines.join('\n');
-                }
-            }
-            </script>
 
             <?php if (! empty($opt['enable_logging'])): 
                 $logs = get_option(self::LOGS_OPTION, []);
@@ -543,22 +546,6 @@ final class Plugin
                     </table>
                 <?php endif; ?>
             </div>
-
-            <script>
-            document.getElementById('wb-clear')?.addEventListener('click', function(){
-                if (!confirm("<?php echo esc_js(self::t('confirm_clear')); ?>")) return;
-                var btn = this;
-                btn.disabled = true;
-                fetch(ajaxurl, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    body: new URLSearchParams({
-                        action: 'webarat_clear_blocked_logs',
-                        nonce: '<?php echo wp_create_nonce('webarat_clear_nonce'); ?>'
-                    })
-                }).then(function(){ window.location.reload(); });
-            });
-            </script>
             <?php endif; ?>
 
             <div class="webarat-card">
